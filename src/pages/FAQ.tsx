@@ -42,17 +42,17 @@ const FAQ = () => {
   // Real-time subscription for FAQs
   useRealtime({
     table: 'faqs',
-    callback: (payload) => {
-      if (payload.eventType === 'INSERT') {
-        const newFaq = payload.new as FAQ;
-        setFaqs(prev => [...prev, newFaq].sort((a, b) => a.order_index - b.order_index));
-      } else if (payload.eventType === 'UPDATE') {
-        const updatedFaq = payload.new as FAQ;
-        setFaqs(prev => prev.map(faq => faq.id === updatedFaq.id ? updatedFaq : faq));
-      } else if (payload.eventType === 'DELETE') {
-        const deletedFaq = payload.old as FAQ;
-        setFaqs(prev => prev.filter(faq => faq.id !== deletedFaq.id));
-      }
+    onInsert: (payload) => {
+      const newFaq = payload.new as FAQ;
+      setFaqs(prev => [...prev, newFaq].sort((a, b) => a.order_index - b.order_index));
+    },
+    onUpdate: (payload) => {
+      const updatedFaq = payload.new as FAQ;
+      setFaqs(prev => prev.map(faq => faq.id === updatedFaq.id ? updatedFaq : faq));
+    },
+    onDelete: (payload) => {
+      const deletedFaq = payload.old as FAQ;
+      setFaqs(prev => prev.filter(faq => faq.id !== deletedFaq.id));
     }
   });
 

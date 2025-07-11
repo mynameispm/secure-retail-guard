@@ -36,15 +36,13 @@ const Contact = () => {
   // Real-time subscription for contact forms
   useRealtime({
     table: 'contact_forms',
-    callback: (payload) => {
-      if (payload.eventType === 'INSERT') {
-        const newSubmission = payload.new as ContactForm;
-        setRecentSubmissions(prev => [newSubmission, ...prev.slice(0, 4)]);
-        toast({
-          title: "New Contact Form Submitted",
-          description: `From: ${newSubmission.name}`,
-        });
-      }
+    onInsert: (payload) => {
+      const newSubmission = payload.new as ContactForm;
+      setRecentSubmissions(prev => [newSubmission, ...prev.slice(0, 4)]);
+      toast({
+        title: "New Contact Form Submitted",
+        description: `From: ${newSubmission.name}`,
+      });
     }
   });
 

@@ -46,21 +46,21 @@ const Documentation = () => {
   // Real-time subscription for support tickets
   useRealtime({
     table: 'support_tickets',
-    callback: (payload) => {
-      if (payload.eventType === 'INSERT') {
-        const newTicket = payload.new as SupportTicket;
-        setTickets(prev => [newTicket, ...prev]);
-        toast({
-          title: "New Support Ticket",
-          description: `Ticket: ${newTicket.title}`,
-        });
-      } else if (payload.eventType === 'UPDATE') {
-        const updatedTicket = payload.new as SupportTicket;
-        setTickets(prev => prev.map(ticket => ticket.id === updatedTicket.id ? updatedTicket : ticket));
-      } else if (payload.eventType === 'DELETE') {
-        const deletedTicket = payload.old as SupportTicket;
-        setTickets(prev => prev.filter(ticket => ticket.id !== deletedTicket.id));
-      }
+    onInsert: (payload) => {
+      const newTicket = payload.new as SupportTicket;
+      setTickets(prev => [newTicket, ...prev]);
+      toast({
+        title: "New Support Ticket",
+        description: `Ticket: ${newTicket.title}`,
+      });
+    },
+    onUpdate: (payload) => {
+      const updatedTicket = payload.new as SupportTicket;
+      setTickets(prev => prev.map(ticket => ticket.id === updatedTicket.id ? updatedTicket : ticket));
+    },
+    onDelete: (payload) => {
+      const deletedTicket = payload.old as SupportTicket;
+      setTickets(prev => prev.filter(ticket => ticket.id !== deletedTicket.id));
     }
   });
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Menu, X, Lock, Smartphone, Users, HelpCircle, LogOut } from "lucide-react";
+import { Shield, Menu, X, Lock, Smartphone, Users, HelpCircle, LogOut, Phone, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,10 +12,13 @@ const Navigation = () => {
 
   const navItems = [
     { name: "Home", href: "/", icon: Shield },
+    { name: "About", href: "/about", icon: Users },
     { name: "How It Works", href: "/how-it-works", icon: Lock },
     { name: "Demo", href: "/demo", icon: Smartphone },
+    { name: "FAQ", href: "/faq", icon: HelpCircle },
+    { name: "Contact", href: "/contact", icon: Phone },
     { name: "Dashboard", href: "/dashboard", icon: Users },
-    { name: "Support", href: "/support", icon: HelpCircle },
+    { name: "Support", href: "/documentation", icon: FileText },
   ];
 
   const isActive = (path: string) => location.pathname === path;

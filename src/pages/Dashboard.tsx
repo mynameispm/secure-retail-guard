@@ -26,6 +26,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const [devices, setDevices] = useState([
@@ -72,6 +80,8 @@ const Dashboard = () => {
   ]);
 
   const [showAddDevice, setShowAddDevice] = useState(false);
+  const [editingDevice, setEditingDevice] = useState(null);
+  const [viewingActivity, setViewingActivity] = useState(null);
 
   const stats = [
     {
@@ -135,7 +145,34 @@ const Dashboard = () => {
     }
   ];
 
-  const getStatusColor = (status: string) => {
+  const getDeviceActivity = (deviceId) => [
+    {
+      id: 1,
+      action: "Authentication Success",
+      timestamp: "2024-01-15 10:30 AM",
+      details: "User successfully authenticated using biometric verification"
+    },
+    {
+      id: 2,
+      action: "Policy Update",
+      timestamp: "2024-01-15 09:15 AM",
+      details: "Security policy updated - encryption level increased"
+    },
+    {
+      id: 3,
+      action: "Location Verified",
+      timestamp: "2024-01-15 08:45 AM",
+      details: "Device location verified within authorized zone"
+    },
+    {
+      id: 4,
+      action: "Backup Completed",
+      timestamp: "2024-01-14 11:20 PM",
+      details: "Automatic security backup completed successfully"
+    }
+  ];
+
+  const getStatusColor = (status) => {
     switch (status) {
       case 'active': return 'bg-success text-success-foreground';
       case 'inactive': return 'bg-muted text-muted-foreground';
@@ -144,14 +181,36 @@ const Dashboard = () => {
     }
   };
 
-  const getSecurityScoreColor = (score: number) => {
+  const getSecurityScoreColor = (score) => {
     if (score >= 90) return 'text-success';
     if (score >= 75) return 'text-warning';
     return 'text-destructive';
   };
 
-  const removeDevice = (deviceId: number) => {
-    setDevices(devices.filter(device => device.id !== deviceId));
+  const handleEditDevice = (device) => {
+    setEditingDevice(device);
+    toast.success(`Opening edit dialog for ${device.name}`);
+  };
+
+  const handleViewActivity = (device) => {
+    setViewingActivity(device);
+    toast.info(`Viewing activity for ${device.name}`);
+  };
+
+  const handleRemoveDevice = (deviceId) => {
+    const device = devices.find(d => d.id === deviceId);
+    if (device) {
+      setDevices(devices.filter(device => device.id !== deviceId));
+      toast.success(`${device.name} has been removed from the system`);
+    }
+  };
+
+  const handleSaveDevice = (updatedDevice) => {
+    setDevices(devices.map(device => 
+      device.id === updatedDevice.id ? updatedDevice : device
+    ));
+    setEditingDevice(null);
+    toast.success(`${updatedDevice.name} has been updated successfully`);
   };
 
   return (
@@ -262,17 +321,17 @@ const Dashboard = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditDevice(device)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit Device
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewActivity(device)}>
                               <Activity className="h-4 w-4 mr-2" />
                               View Activity
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="text-destructive"
-                              onClick={() => removeDevice(device.id)}
+                              onClick={() => handleRemoveDevice(device.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Remove Device
@@ -352,7 +411,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Add Device Modal Placeholder */}
+        {/* Add Device Modal */}
         {showAddDevice && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <Card className="w-full max-w-md security-card">
@@ -390,6 +449,85 @@ const Dashboard = () => {
             </Card>
           </div>
         )}
+
+        {/* Edit Device Dialog */}
+        <Dialog open={!!editingDevice} onOpenChange={() => setEditingDevice(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Device</DialogTitle>
+              <DialogDescription>
+                Update device settings and configuration
+              </DialogDescription>
+            </DialogHeader>
+            {editingDevice && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Device Name</label>
+                  <input 
+                    type="text" 
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-md" 
+                    defaultValue={editingDevice.name}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Location</label>
+                  <input 
+                    type="text" 
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-md" 
+                    defaultValue={editingDevice.location}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <select className="w-full mt-1 px-3 py-2 border border-border rounded-md" defaultValue={editingDevice.status}>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="warning">Warning</option>
+                  </select>
+                </div>
+                <div className="flex space-x-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setEditingDevice(null)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={() => handleSaveDevice(editingDevice)}>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* View Activity Dialog */}
+        <Dialog open={!!viewingActivity} onOpenChange={() => setViewingActivity(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Device Activity</DialogTitle>
+              <DialogDescription>
+                Recent security events for {viewingActivity?.name}
+              </DialogDescription>
+            </DialogHeader>
+            {viewingActivity && (
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {getDeviceActivity(viewingActivity.id).map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border border-border">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{activity.details}</p>
+                      <p className="text-xs text-muted-foreground mt-2">{activity.timestamp}</p>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex justify-end pt-4">
+                  <Button variant="outline" onClick={() => setViewingActivity(null)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Quick Actions */}
         <div className="mt-12 text-center bg-gradient-card rounded-2xl p-8 shadow-security">

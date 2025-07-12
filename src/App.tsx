@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import About from "./pages/About";
 import HowItWorks from "./pages/HowItWorks";
 import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
+import Analytics from "./pages/Analytics";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import Documentation from "./pages/Documentation";
@@ -38,6 +40,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <Analytics />
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />

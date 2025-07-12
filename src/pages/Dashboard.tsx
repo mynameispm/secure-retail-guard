@@ -334,10 +334,12 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <Button variant="outline" size="sm">
-              <Activity className="h-4 w-4 mr-2" />
-              View Analytics
-            </Button>
+            <Link to="/analytics">
+              <Button variant="outline" size="sm">
+                <Activity className="h-4 w-4 mr-2" />
+                View Analytics
+              </Button>
+            </Link>
             <Button 
               onClick={() => setShowAddDevice(true)}
               className="security-button"

@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -45,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import AllDevicesView from "@/components/AllDevicesView";
 
 const Dashboard = () => {
   const [devices, setDevices] = useState([
@@ -94,6 +94,7 @@ const Dashboard = () => {
   const [editingDevice, setEditingDevice] = useState(null);
   const [viewingActivity, setViewingActivity] = useState(null);
   const [deviceToRemove, setDeviceToRemove] = useState(null);
+  const [showAllDevices, setShowAllDevices] = useState(false);
 
   const nameRef = useRef(null);
   const locationRef = useRef(null);
@@ -216,6 +217,14 @@ const Dashboard = () => {
     setDeviceToRemove(device);
   };
 
+  const handleViewAllDevices = () => {
+    setShowAllDevices(true);
+  };
+
+  const handleBackToDashboard = () => {
+    setShowAllDevices(false);
+  };
+
   const confirmRemoveDevice = () => {
     if (deviceToRemove) {
       setDevices(devices.filter(device => device.id !== deviceToRemove.id));
@@ -240,6 +249,18 @@ const Dashboard = () => {
       toast.success(`${updatedDevice.name} has been updated successfully`);
     }
   };
+
+  if (showAllDevices) {
+    return (
+      <AllDevicesView
+        devices={devices}
+        onBack={handleBackToDashboard}
+        onEditDevice={handleEditDevice}
+        onViewActivity={handleViewActivity}
+        onRemoveDevice={handleRemoveDevice}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-16">
@@ -304,7 +325,7 @@ const Dashboard = () => {
                       Manage and monitor connected devices
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleViewAllDevices}>
                     <Eye className="h-4 w-4 mr-2" />
                     View All
                   </Button>

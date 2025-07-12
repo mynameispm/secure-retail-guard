@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -164,25 +165,25 @@ const Dashboard = () => {
     {
       id: 1,
       action: "Authentication Success",
-      timestamp: "2024-01-15 10:30 AM",
+      timestamp: "2025-07-15 10:30 AM",
       details: "User successfully authenticated using biometric verification"
     },
     {
       id: 2,
       action: "Policy Update",
-      timestamp: "2024-01-15 09:15 AM",
+      timestamp: "2025-07-14 09:15 AM",
       details: "Security policy updated - encryption level increased"
     },
     {
       id: 3,
       action: "Location Verified",
-      timestamp: "2024-01-15 08:45 AM",
+      timestamp: "2025-07-12 08:45 AM",
       details: "Device location verified within authorized zone"
     },
     {
       id: 4,
       action: "Backup Completed",
-      timestamp: "2024-01-14 11:20 PM",
+      timestamp: "2025-06-28 11:20 PM",
       details: "Automatic security backup completed successfully"
     }
   ];

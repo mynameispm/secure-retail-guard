@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Shield, 
@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import AllDevicesView from "@/components/AllDevicesView";
+import QRCode from 'qrcode';
 
 const Dashboard = () => {
   const [devices, setDevices] = useState([
@@ -95,10 +96,70 @@ const Dashboard = () => {
   const [viewingActivity, setViewingActivity] = useState(null);
   const [deviceToRemove, setDeviceToRemove] = useState(null);
   const [showAllDevices, setShowAllDevices] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [enrollmentStatus, setEnrollmentStatus] = useState('waiting');
 
   const nameRef = useRef(null);
   const locationRef = useRef(null);
   const statusRef = useRef(null);
+
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (showAddDevice) {
+        try {
+          const enrollmentData = {
+            action: 'enroll_device',
+            server: 'secure-retail-guard.app',
+            timestamp: Date.now(),
+            enrollmentId: Math.random().toString(36).substr(2, 9)
+          };
+          
+          const qrDataUrl = await QRCode.toDataURL(JSON.stringify(enrollmentData), {
+            width: 200,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#ffffff'
+            }
+          });
+          
+          setQrCodeUrl(qrDataUrl);
+          setEnrollmentStatus('waiting');
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+        }
+      }
+    };
+
+    generateQRCode();
+  }, [showAddDevice]);
+
+  const simulateEnrollment = () => {
+    setEnrollmentStatus('enrolling');
+    toast.info('Device detected! Enrolling...');
+    
+    setTimeout(() => {
+      const newDevice = {
+        id: devices.length + 1,
+        name: `New Device ${devices.length + 1}`,
+        type: "Mobile",
+        status: "active",
+        lastSeen: "Just now",
+        securityScore: 85,
+        location: "Store #001",
+        enrolledDate: new Date().toISOString().split('T')[0]
+      };
+      
+      setDevices([...devices, newDevice]);
+      setEnrollmentStatus('completed');
+      toast.success(`${newDevice.name} has been successfully enrolled!`);
+      
+      setTimeout(() => {
+        setShowAddDevice(false);
+        setEnrollmentStatus('waiting');
+      }, 2000);
+    }, 3000);
+  };
 
   const stats = [
     {
@@ -172,13 +233,13 @@ const Dashboard = () => {
     {
       id: 2,
       action: "Policy Update",
-      timestamp: "2025-07-14 09:15 AM",
+      timestamp: "2025-06-14 09:15 AM",
       details: "Security policy updated - encryption level increased"
     },
     {
       id: 3,
       action: "Location Verified",
-      timestamp: "2025-07-12 08:45 AM",
+      timestamp: "2025-06-12 08:45 AM",
       details: "Device location verified within authorized zone"
     },
     {
@@ -265,7 +326,6 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen pt-20 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 animate-fade-in-up">
           <div>
             <h1 className="text-3xl font-bold mb-2">Security Dashboard</h1>
@@ -288,7 +348,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
             <Card key={index} className="security-card">
@@ -314,7 +373,6 @@ const Dashboard = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Device Management */}
           <div className="lg:col-span-2 space-y-6">
             <Card className="security-card">
               <CardHeader>
@@ -395,9 +453,7 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Recent Activity */}
             <Card className="security-card">
               <CardHeader>
                 <CardTitle className="text-lg">Recent Activity</CardTitle>
@@ -422,7 +478,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Security Tips */}
             <Card className="security-card">
               <CardHeader>
                 <CardTitle className="text-lg">Security Tips</CardTitle>
@@ -460,46 +515,105 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Add Device Modal */}
         {showAddDevice && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <Card className="w-full max-w-md security-card">
               <CardHeader>
                 <CardTitle>Add New Device</CardTitle>
                 <CardDescription>
-                  Scan the QR code to enroll a new device
+                  {enrollmentStatus === 'waiting' && "Scan the QR code to enroll a new device"}
+                  {enrollmentStatus === 'enrolling' && "Enrolling device..."}
+                  {enrollmentStatus === 'completed' && "Device enrolled successfully!"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex justify-center">
-                  <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
-                    <QrCode className="h-16 w-16 text-muted-foreground" />
-                  </div>
+                  {enrollmentStatus === 'waiting' && (
+                    <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center border">
+                      {qrCodeUrl ? (
+                        <img src={qrCodeUrl} alt="QR Code for device enrollment" className="w-full h-full" />
+                      ) : (
+                        <QrCode className="h-16 w-16 text-muted-foreground animate-pulse" />
+                      )}
+                    </div>
+                  )}
+                  {enrollmentStatus === 'enrolling' && (
+                    <div className="w-48 h-48 bg-muted rounded-lg flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                      <p className="text-sm text-muted-foreground">Enrolling...</p>
+                    </div>
+                  )}
+                  {enrollmentStatus === 'completed' && (
+                    <div className="w-48 h-48 bg-success/10 rounded-lg flex flex-col items-center justify-center">
+                      <CheckCircle className="h-16 w-16 text-success mb-4" />
+                      <p className="text-sm font-medium text-success">Success!</p>
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-center text-muted-foreground">
-                  Point your device camera at this QR code to begin enrollment
-                </p>
+                
+                <div className="text-center">
+                  {enrollmentStatus === 'waiting' && (
+                    <p className="text-sm text-muted-foreground">
+                      Point your device camera at this QR code to begin enrollment
+                    </p>
+                  )}
+                  {enrollmentStatus === 'enrolling' && (
+                    <p className="text-sm text-muted-foreground">
+                      Please wait while we securely enroll your device...
+                    </p>
+                  )}
+                  {enrollmentStatus === 'completed' && (
+                    <p className="text-sm text-success">
+                      Your device has been successfully enrolled and secured!
+                    </p>
+                  )}
+                </div>
+                
                 <div className="flex space-x-3">
                   <Button 
                     variant="outline" 
                     className="flex-1"
-                    onClick={() => setShowAddDevice(false)}
+                    onClick={() => {
+                      setShowAddDevice(false);
+                      setEnrollmentStatus('waiting');
+                    }}
+                    disabled={enrollmentStatus === 'enrolling'}
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    className="flex-1 security-button"
-                    onClick={() => setShowAddDevice(false)}
-                  >
-                    Complete
-                  </Button>
+                  {enrollmentStatus === 'waiting' && (
+                    <Button 
+                      className="flex-1 security-button"
+                      onClick={simulateEnrollment}
+                    >
+                      Simulate Scan
+                    </Button>
+                  )}
+                  {enrollmentStatus === 'enrolling' && (
+                    <Button 
+                      className="flex-1 security-button"
+                      disabled
+                    >
+                      Enrolling...
+                    </Button>
+                  )}
+                  {enrollmentStatus === 'completed' && (
+                    <Button 
+                      className="flex-1 security-button"
+                      onClick={() => {
+                        setShowAddDevice(false);
+                        setEnrollmentStatus('waiting');
+                      }}
+                    >
+                      Done
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Edit Device Dialog */}
         <Dialog open={!!editingDevice} onOpenChange={() => setEditingDevice(null)}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -553,7 +667,6 @@ const Dashboard = () => {
           </DialogContent>
         </Dialog>
 
-        {/* View Activity Dialog */}
         <Dialog open={!!viewingActivity} onOpenChange={() => setViewingActivity(null)}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
@@ -584,7 +697,6 @@ const Dashboard = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Remove Device Confirmation */}
         <AlertDialog open={!!deviceToRemove} onOpenChange={() => setDeviceToRemove(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -604,7 +716,6 @@ const Dashboard = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Quick Actions */}
         <div className="mt-12 text-center bg-gradient-card rounded-2xl p-8 shadow-security">
           <h2 className="text-xl font-bold mb-4">Need Help?</h2>
           <p className="text-muted-foreground mb-6">

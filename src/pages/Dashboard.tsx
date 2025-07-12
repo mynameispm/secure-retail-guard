@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { 
   Shield, 
@@ -33,6 +33,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -82,6 +92,11 @@ const Dashboard = () => {
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [editingDevice, setEditingDevice] = useState(null);
   const [viewingActivity, setViewingActivity] = useState(null);
+  const [deviceToRemove, setDeviceToRemove] = useState(null);
+
+  const nameRef = useRef(null);
+  const locationRef = useRef(null);
+  const statusRef = useRef(null);
 
   const stats = [
     {
@@ -189,7 +204,6 @@ const Dashboard = () => {
 
   const handleEditDevice = (device) => {
     setEditingDevice(device);
-    toast.success(`Opening edit dialog for ${device.name}`);
   };
 
   const handleViewActivity = (device) => {
@@ -197,20 +211,33 @@ const Dashboard = () => {
     toast.info(`Viewing activity for ${device.name}`);
   };
 
-  const handleRemoveDevice = (deviceId) => {
-    const device = devices.find(d => d.id === deviceId);
-    if (device) {
-      setDevices(devices.filter(device => device.id !== deviceId));
-      toast.success(`${device.name} has been removed from the system`);
+  const handleRemoveDevice = (device) => {
+    setDeviceToRemove(device);
+  };
+
+  const confirmRemoveDevice = () => {
+    if (deviceToRemove) {
+      setDevices(devices.filter(device => device.id !== deviceToRemove.id));
+      toast.success(`${deviceToRemove.name} has been removed from the system`);
+      setDeviceToRemove(null);
     }
   };
 
-  const handleSaveDevice = (updatedDevice) => {
-    setDevices(devices.map(device => 
-      device.id === updatedDevice.id ? updatedDevice : device
-    ));
-    setEditingDevice(null);
-    toast.success(`${updatedDevice.name} has been updated successfully`);
+  const handleSaveDevice = () => {
+    if (editingDevice && nameRef.current && locationRef.current && statusRef.current) {
+      const updatedDevice = {
+        ...editingDevice,
+        name: nameRef.current.value,
+        location: locationRef.current.value,
+        status: statusRef.current.value
+      };
+
+      setDevices(devices.map(device => 
+        device.id === updatedDevice.id ? updatedDevice : device
+      ));
+      setEditingDevice(null);
+      toast.success(`${updatedDevice.name} has been updated successfully`);
+    }
   };
 
   return (
@@ -331,7 +358,7 @@ const Dashboard = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="text-destructive"
-                              onClick={() => handleRemoveDevice(device.id)}
+                              onClick={() => handleRemoveDevice(device)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Remove Device
@@ -464,6 +491,7 @@ const Dashboard = () => {
                 <div>
                   <label className="text-sm font-medium">Device Name</label>
                   <input 
+                    ref={nameRef}
                     type="text" 
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md" 
                     defaultValue={editingDevice.name}
@@ -472,6 +500,7 @@ const Dashboard = () => {
                 <div>
                   <label className="text-sm font-medium">Location</label>
                   <input 
+                    ref={locationRef}
                     type="text" 
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md" 
                     defaultValue={editingDevice.location}
@@ -479,7 +508,11 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Status</label>
-                  <select className="w-full mt-1 px-3 py-2 border border-border rounded-md" defaultValue={editingDevice.status}>
+                  <select 
+                    ref={statusRef}
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-md" 
+                    defaultValue={editingDevice.status}
+                  >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                     <option value="warning">Warning</option>
@@ -489,7 +522,7 @@ const Dashboard = () => {
                   <Button variant="outline" className="flex-1" onClick={() => setEditingDevice(null)}>
                     Cancel
                   </Button>
-                  <Button className="flex-1" onClick={() => handleSaveDevice(editingDevice)}>
+                  <Button className="flex-1" onClick={handleSaveDevice}>
                     Save changes
                   </Button>
                 </div>
@@ -528,6 +561,26 @@ const Dashboard = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Remove Device Confirmation */}
+        <AlertDialog open={!!deviceToRemove} onOpenChange={() => setDeviceToRemove(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Device</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove "{deviceToRemove?.name}" from the system? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeviceToRemove(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={confirmRemoveDevice} className="bg-destructive hover:bg-destructive/90">
+                Remove Device
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Quick Actions */}
         <div className="mt-12 text-center bg-gradient-card rounded-2xl p-8 shadow-security">

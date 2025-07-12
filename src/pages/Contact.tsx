@@ -128,13 +128,13 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Call Us",
-      content: "+1 (555) 123-4567",
-      description: "Mon-Fri 9AM-6PM EST"
+      content: "+91 80 2345 6789",
+      description: "Mon-Fri 9AM-6PM IST"
     },
     {
       icon: MapPin,
       title: "Visit Us",
-      content: "123 Security Lane, Tech City, TC 12345",
+      content: "Dayananda Sagar Academy of Technology and Management, Bangalore, Karnataka 560082",
       description: "By appointment only"
     }
   ];

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -41,37 +40,134 @@ import {
 const Analytics = () => {
   const [timeRange, setTimeRange] = useState("7d");
 
-  const securityTrendData = [
-    { date: "Jun 01", score: 92, threats: 12, devices: 2840 },
-    { date: "Jun 08", score: 94, threats: 8, devices: 2845 },
-    { date: "Jun 15", score: 96, threats: 5, devices: 2847 },
-    { date: "Jun 22", score: 94, threats: 15, devices: 2850 },
-    { date: "Jun 29", score: 95, threats: 9, devices: 2855 },
-    { date: "Jul 06", score: 97, threats: 3, devices: 2860 },
-    { date: "Jul 13", score: 94, threats: 18, devices: 2847 }
-  ];
+  const getSecurityTrendData = () => {
+    switch (timeRange) {
+      case "7d":
+        return [
+          { date: "Jul 07", score: 92, threats: 12, devices: 2840 },
+          { date: "Jul 08", score: 94, threats: 8, devices: 2845 },
+          { date: "Jul 09", score: 96, threats: 5, devices: 2847 },
+          { date: "Jul 10", score: 94, threats: 15, devices: 2850 },
+          { date: "Jul 11", score: 95, threats: 9, devices: 2855 },
+          { date: "Jul 12", score: 97, threats: 3, devices: 2860 },
+          { date: "Jul 13", score: 94, threats: 18, devices: 2847 }
+        ];
+      case "30d":
+        return [
+          { date: "Jun 15", score: 88, threats: 45, devices: 2780 },
+          { date: "Jun 20", score: 90, threats: 38, devices: 2795 },
+          { date: "Jun 25", score: 92, threats: 32, devices: 2810 },
+          { date: "Jun 30", score: 91, threats: 28, devices: 2825 },
+          { date: "Jul 05", score: 93, threats: 25, devices: 2840 },
+          { date: "Jul 10", score: 95, threats: 20, devices: 2855 },
+          { date: "Jul 13", score: 94, threats: 18, devices: 2847 }
+        ];
+      case "90d":
+        return [
+          { date: "Apr 15", score: 82, threats: 85, devices: 2600 },
+          { date: "May 01", score: 84, threats: 78, devices: 2650 },
+          { date: "May 15", score: 86, threats: 72, devices: 2700 },
+          { date: "Jun 01", score: 88, threats: 65, devices: 2750 },
+          { date: "Jun 15", score: 90, threats: 58, devices: 2800 },
+          { date: "Jul 01", score: 93, threats: 45, devices: 2840 },
+          { date: "Jul 13", score: 94, threats: 18, devices: 2847 }
+        ];
+      default:
+        return [];
+    }
+  };
 
-  const deviceTypeData = [
-    { name: "Mobile", value: 1580, color: "#6366f1" },
-    { name: "Tablet", value: 789, color: "#8b5cf6" },
-    { name: "Laptop", value: 456, color: "#06b6d4" },
-    { name: "Desktop", value: 122, color: "#10b981" }
-  ];
+  const getDeviceTypeData = () => {
+    switch (timeRange) {
+      case "7d":
+        return [
+          { name: "Mobile", value: 1580, color: "#6366f1" },
+          { name: "Tablet", value: 789, color: "#8b5cf6" },
+          { name: "Laptop", value: 456, color: "#06b6d4" },
+          { name: "Desktop", value: 122, color: "#10b981" }
+        ];
+      case "30d":
+        return [
+          { name: "Mobile", value: 1520, color: "#6366f1" },
+          { name: "Tablet", value: 745, color: "#8b5cf6" },
+          { name: "Laptop", value: 425, color: "#06b6d4" },
+          { name: "Desktop", value: 135, color: "#10b981" }
+        ];
+      case "90d":
+        return [
+          { name: "Mobile", value: 1450, color: "#6366f1" },
+          { name: "Tablet", value: 680, color: "#8b5cf6" },
+          { name: "Laptop", value: 380, color: "#06b6d4" },
+          { name: "Desktop", value: 90, color: "#10b981" }
+        ];
+      default:
+        return [];
+    }
+  };
 
-  const threatTypeData = [
-    { type: "Malware", count: 45, severity: "high" },
-    { type: "Phishing", count: 32, severity: "medium" },
-    { type: "Unauthorized Access", count: 28, severity: "high" },
-    { type: "Data Breach Attempt", count: 15, severity: "critical" },
-    { type: "Suspicious Activity", count: 36, severity: "low" }
-  ];
+  const getThreatTypeData = () => {
+    switch (timeRange) {
+      case "7d":
+        return [
+          { type: "Malware", count: 45, severity: "high" },
+          { type: "Phishing", count: 32, severity: "medium" },
+          { type: "Unauthorized Access", count: 28, severity: "high" },
+          { type: "Data Breach Attempt", count: 15, severity: "critical" },
+          { type: "Suspicious Activity", count: 36, severity: "low" }
+        ];
+      case "30d":
+        return [
+          { type: "Malware", count: 180, severity: "high" },
+          { type: "Phishing", count: 145, severity: "medium" },
+          { type: "Unauthorized Access", count: 92, severity: "high" },
+          { type: "Data Breach Attempt", count: 38, severity: "critical" },
+          { type: "Suspicious Activity", count: 125, severity: "low" }
+        ];
+      case "90d":
+        return [
+          { type: "Malware", count: 520, severity: "high" },
+          { type: "Phishing", count: 445, severity: "medium" },
+          { type: "Unauthorized Access", count: 285, severity: "high" },
+          { type: "Data Breach Attempt", count: 128, severity: "critical" },
+          { type: "Suspicious Activity", count: 365, severity: "low" }
+        ];
+      default:
+        return [];
+    }
+  };
 
-  const performanceMetrics = [
-    { metric: "Average Response Time", value: "0.3s", change: "-12%", positive: true },
-    { metric: "System Uptime", value: "99.9%", change: "+0.1%", positive: true },
-    { metric: "Failed Authentications", value: "0.02%", change: "-25%", positive: true },
-    { metric: "Policy Compliance", value: "98.5%", change: "+2.1%", positive: true }
-  ];
+  const getPerformanceMetrics = () => {
+    switch (timeRange) {
+      case "7d":
+        return [
+          { metric: "Average Response Time", value: "0.3s", change: "-12%", positive: true },
+          { metric: "System Uptime", value: "99.9%", change: "+0.1%", positive: true },
+          { metric: "Failed Authentications", value: "0.02%", change: "-25%", positive: true },
+          { metric: "Policy Compliance", value: "98.5%", change: "+2.1%", positive: true }
+        ];
+      case "30d":
+        return [
+          { metric: "Average Response Time", value: "0.35s", change: "-8%", positive: true },
+          { metric: "System Uptime", value: "99.8%", change: "+0.2%", positive: true },
+          { metric: "Failed Authentications", value: "0.03%", change: "-18%", positive: true },
+          { metric: "Policy Compliance", value: "98.2%", change: "+1.8%", positive: true }
+        ];
+      case "90d":
+        return [
+          { metric: "Average Response Time", value: "0.42s", change: "-15%", positive: true },
+          { metric: "System Uptime", value: "99.7%", change: "+0.3%", positive: true },
+          { metric: "Failed Authentications", value: "0.05%", change: "-35%", positive: true },
+          { metric: "Policy Compliance", value: "97.8%", change: "+3.2%", positive: true }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const securityTrendData = getSecurityTrendData();
+  const deviceTypeData = getDeviceTypeData();
+  const threatTypeData = getThreatTypeData();
+  const performanceMetrics = getPerformanceMetrics();
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {

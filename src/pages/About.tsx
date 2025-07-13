@@ -18,7 +18,7 @@ const About = () => {
     },
     {
       icon: Shield,
-      title: "Security Excellence",
+      title: "Security Excellence", 
       description: "We maintain the highest security standards with continuous monitoring and improvement."
     },
     {
@@ -109,7 +109,7 @@ const About = () => {
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
                 <div className="space-y-4 text-muted-foreground">
                   <p>
-                    Founded in 2019, SecureRetail emerged from a simple observation: traditional security 
+                    Founded in 2025, SecureRetail emerged from a simple observation: traditional security 
                     systems were failing to protect against sophisticated context spoofing attacks in retail 
                     environments.
                   </p>

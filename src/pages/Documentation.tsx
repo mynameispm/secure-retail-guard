@@ -153,6 +153,7 @@ const Documentation = () => {
       const submitData = {
         ...formData,
         user_id: user.id,
+        ...(editingTicket ? {} : { status: 'open' }) // Only set status for new tickets
       };
 
       if (editingTicket) {
@@ -181,6 +182,9 @@ const Documentation = () => {
       setFormData({ title: "", description: "", category: "general", priority: "medium" });
       setIsAddDialogOpen(false);
       setEditingTicket(null);
+      
+      // Reload tickets to see the changes
+      await loadTickets();
     } catch (error) {
       console.error('Error saving ticket:', error);
       toast({
@@ -214,6 +218,9 @@ const Documentation = () => {
         title: "Status Updated",
         description: `Ticket status updated to ${newStatus}.`,
       });
+      
+      // Reload tickets to see the changes
+      await loadTickets();
     } catch (error) {
       console.error('Error updating status:', error);
       toast({
@@ -332,7 +339,13 @@ const Documentation = () => {
                       </div>
 
                       <div className="flex justify-end">
-                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+                          setIsAddDialogOpen(open);
+                          if (!open) {
+                            setEditingTicket(null);
+                            setFormData({ title: "", description: "", category: "general", priority: "medium" });
+                          }
+                        }}>
                           <DialogTrigger asChild>
                             <Button className="security-button">
                               <Plus className="h-4 w-4 mr-2" />

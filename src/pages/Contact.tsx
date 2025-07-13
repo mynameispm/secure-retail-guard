@@ -1,25 +1,14 @@
-import { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle, Clock } from "lucide-react";
+
+import { useState } from "react";
+import { Mail, Phone, MapPin, Send, MessageCircle, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { useRealtime } from "@/hooks/useRealtime";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-
-interface ContactForm {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  status: string;
-  created_at: string;
-}
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -29,69 +18,20 @@ const Contact = () => {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [recentSubmissions, setRecentSubmissions] = useState<ContactForm[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
-
-  // Real-time subscription for contact forms
-  useRealtime({
-    table: 'contact_forms',
-    onInsert: (payload) => {
-      const newSubmission = payload.new as ContactForm;
-      setRecentSubmissions(prev => [newSubmission, ...prev.slice(0, 4)]);
-      toast({
-        title: "New Contact Form Submitted",
-        description: `From: ${newSubmission.name}`,
-      });
-    }
-  });
-
-  useEffect(() => {
-    loadRecentSubmissions();
-  }, []);
-
-  const loadRecentSubmissions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('contact_forms')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      setRecentSubmissions(data || []);
-    } catch (error) {
-      console.error('Error loading submissions:', error);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubjectChange = (value: string) => {
-    setFormData({
-      ...formData,
-      subject: value,
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const submitData = {
-        ...formData,
-        user_id: user?.id || null,
-      };
-
       const { error } = await supabase
         .from('contact_forms')
-        .insert([submitData]);
+        .insert([{
+          ...formData,
+          user_id: user?.id || null,
+        }]);
 
       if (error) throw error;
 
@@ -100,14 +40,9 @@ const Contact = () => {
         description: "We'll get back to you within 24 hours.",
       });
 
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error sending message:', error);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -118,26 +53,12 @@ const Contact = () => {
     }
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: "Email Us",
-      content: "support@secureretail.com",
-      description: "We'll respond within 24 hours"
-    },
-    {
-      icon: Phone,
-      title: "Call Us",
-      content: "+91 80 2345 6789",
-      description: "Mon-Fri 9AM-6PM IST"
-    },
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      content: "Dayananda Sagar Academy of Technology and Management, Bangalore, Karnataka 560082",
-      description: "By appointment only"
-    }
-  ];
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,178 +69,215 @@ const Contact = () => {
         <section className="py-20 bg-gradient-hero">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Get in <span className="bg-gradient-primary bg-clip-text text-transparent">Touch</span>
+              Contact <span className="bg-gradient-primary bg-clip-text text-transparent">Us</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Have questions about SecureRetail? Need help with implementation? 
-              Our security experts are here to help you protect your business.
+              Have questions about SecureRetail? We're here to help. Reach out to our expert team 
+              for support, demos, or partnership opportunities.
             </p>
           </div>
         </section>
 
-        {/* Contact Section */}
+        {/* Contact Information */}
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12">
-              {/* Contact Form */}
+            <div className="grid lg:grid-cols-3 gap-8 mb-16">
+              <Card className="security-card text-center">
+                <CardContent className="p-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+                    <Mail className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">Email Us</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Get in touch for support, sales, or general inquiries
+                  </p>
+                  <a 
+                    href="mailto:secureretail2005@gmail.com" 
+                    className="text-primary hover:underline font-medium"
+                  >
+                    secureretail2005@gmail.com
+                  </a>
+                </CardContent>
+              </Card>
+
+              <Card className="security-card text-center">
+                <CardContent className="p-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+                    <Phone className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">Call Us</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Speak directly with our security experts
+                  </p>
+                  <p className="text-primary font-medium">+1 (555) 123-4567</p>
+                </CardContent>
+              </Card>
+
+              <Card className="security-card text-center">
+                <CardContent className="p-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+                    <MapPin className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">Visit Us</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Our headquarters in the heart of Silicon Valley
+                  </p>
+                  <p className="text-primary font-medium">
+                    123 Security Blvd<br />
+                    San Francisco, CA 94102
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Contact Form */}
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
               <div>
-                <Card className="security-card">
-                  <CardHeader>
-                    <CardTitle className="text-2xl">Send us a Message</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="name" className="block text-sm font-medium mb-2">
-                            Full Name *
-                          </label>
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            required
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            placeholder="Your full name"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="email" className="block text-sm font-medium mb-2">
-                            Email Address *
-                          </label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            required
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            placeholder="your@email.com"
-                          />
-                        </div>
-                      </div>
+                <h2 className="text-3xl font-bold mb-6">Send us a message</h2>
+                <p className="text-muted-foreground mb-8">
+                  Fill out the form below and we'll get back to you as soon as possible. 
+                  For urgent security matters, please call us directly.
+                </p>
 
-                      <div>
-                        <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                          Subject *
-                        </label>
-                        <Select onValueChange={handleSubjectChange} value={formData.subject}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a subject" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="general">General Inquiry</SelectItem>
-                            <SelectItem value="sales">Sales & Pricing</SelectItem>
-                            <SelectItem value="support">Technical Support</SelectItem>
-                            <SelectItem value="partnership">Partnership</SelectItem>
-                            <SelectItem value="security">Security Issue</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <label htmlFor="message" className="block text-sm font-medium mb-2">
-                          Message *
-                        </label>
-                        <Textarea
-                          id="message"
-                          name="message"
-                          required
-                          rows={6}
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          placeholder="Tell us about your inquiry..."
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full security-button"
-                      >
-                        {isSubmitting ? (
-                          <Clock className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="mr-2 h-4 w-4" />
-                        )}
-                        {isSubmitting ? "Sending..." : "Send Message"}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Contact Info & Recent Activity */}
-              <div className="space-y-8">
-                {/* Contact Information */}
-                <div>
-                  <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
-                  <div className="space-y-6">
-                    {contactInfo.map((info, index) => (
-                      <Card key={index} className="security-card">
-                        <CardContent className="p-6">
-                          <div className="flex items-start space-x-4">
-                            <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
-                              <info.icon className="h-6 w-6 text-primary" />
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-1">{info.title}</h4>
-                              <p className="text-foreground mb-1">{info.content}</p>
-                              <p className="text-sm text-muted-foreground">{info.description}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-3">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Response Time</p>
+                      <p className="text-sm text-muted-foreground">Within 24 hours</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Users className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Expert Support</p>
+                      <p className="text-sm text-muted-foreground">Direct access to our security team</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Personalized Solutions</p>
+                      <p className="text-sm text-muted-foreground">Tailored security recommendations</p>
+                    </div>
                   </div>
                 </div>
-
-                {/* Recent Activity */}
-                {recentSubmissions.length > 0 && (
-                  <div>
-                    <h3 className="text-2xl font-bold mb-6">Recent Contact Activity</h3>
-                    <Card className="security-card">
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center">
-                          <CheckCircle className="h-5 w-5 text-success mr-2" />
-                          Live Updates
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {recentSubmissions.slice(0, 5).map((submission) => (
-                            <div key={submission.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                              <div>
-                                <p className="font-medium text-sm">{submission.name}</p>
-                                <p className="text-xs text-muted-foreground">{submission.subject}</p>
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {new Date(submission.created_at).toLocaleDateString()}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
-
-                {/* Response Time */}
-                <Card className="security-card">
-                  <CardContent className="p-6">
-                    <div className="text-center">
-                      <Clock className="h-12 w-12 text-primary mx-auto mb-4" />
-                      <h4 className="font-semibold mb-2">Quick Response Time</h4>
-                      <p className="text-sm text-muted-foreground">
-                        We typically respond to all inquiries within 24 hours. 
-                        Urgent security matters are handled immediately.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
+
+              <Card className="security-card">
+                <CardHeader>
+                  <CardTitle>Contact Form</CardTitle>
+                  <CardDescription>
+                    We'll respond to your inquiry within 24 hours
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Name *</label>
+                        <Input
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Your full name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Email *</label>
+                        <Input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="your@email.com"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Subject *</label>
+                      <Input
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleChange}
+                        placeholder="What can we help you with?"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Message *</label>
+                      <Textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Tell us more about your inquiry..."
+                        rows={6}
+                        required
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full security-button"
+                      disabled={isSubmitting}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      {isSubmitting ? "Sending..." : "Send Message"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-20 bg-muted/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+              <p className="text-xl text-muted-foreground">
+                Quick answers to common questions about SecureRetail
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="security-card">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-3">How quickly can SecureRetail be deployed?</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Our zero-knowledge security framework can be deployed in as little as 48 hours 
+                    for most retail environments, with full integration typically completed within a week.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="security-card">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-3">What makes SecureRetail different?</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Unlike traditional security systems, SecureRetail uses zero-knowledge proofs to 
+                    verify authenticity without compromising user privacy or storing sensitive data.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="security-card">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-3">Do you offer 24/7 support?</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Yes, our enterprise customers receive 24/7 monitoring and support from our 
+                    dedicated security operations center with guaranteed response times.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="security-card">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-3">Is SecureRetail compliant with regulations?</h3>
+                  <p className="text-muted-foreground text-sm">
+                    SecureRetail is designed to meet GDPR, CCPA, and other privacy regulations, 
+                    with built-in compliance features and regular security audits.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
